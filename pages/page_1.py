@@ -4,7 +4,32 @@ import numpy as np
 from libraries import ReadXML
 from datetime import datetime
 import re
-
+import csv
+from io import StringIO
+def Create_FinalCSV(dataframe,ground):
+    
+    Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
+    dataframe["UTC_Start_Time"] = (dataframe["UTC_Start_Time"] + pd.to_timedelta(dataframe["Duration"], unit="ms")).dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    for row in dataframe.itertuples(index=False):
+        if(ground):
+                Uber_DF.loc[len(Uber_DF)] = [
+                    row.UTC_Start_Time,
+                    'Info',
+                    'Activity',
+                    'Ground Station',
+                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
+                    "230"
+                    ]
+        else:
+            Uber_DF.loc[len(Uber_DF)] = [
+                row.UTC_Start_Time,
+                    'Info',
+                    'Activity',
+                    'Spacecraft',
+                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
+                    "232"
+                    ]
+    return(Uber_DF)
 def print_validity(filename):
 
     # Regular expression to extract start and end validity timestamps
@@ -76,8 +101,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
         sda4_passes = st.toggle("Take SDA4 passes")
         dba_passes = st.toggle("Take DBA passes")
         if ttc_check or sda4_passes or sda5_passes or dba_passes:
-            Uber_DF = pd.DataFrame(columns=["#", "TRUE", "D", "Unnamed: 3", "Unnamed: 4", "Unnamed: 5"])
-
+            Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
             if uploaded_files is not None:
                 
                 for file in uploaded_files:
@@ -105,15 +129,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
 
                             
 
@@ -135,15 +151,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if sda4_passes:
                             st.markdown("SDA4 selected")
                             df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "SDA4"]
@@ -162,15 +170,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if dba_passes:
                             st.markdown("DBA1 selected")
                             df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "DBA1"]
@@ -190,14 +190,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         hide_index=True,
                                     )
                             for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
 #-------------------------------SGA2----------------------------------------------------------
                     elif "SGA2" in data_name:
                         Pases_DF["SGA2"] = ReadXML.Read_XML(file)
@@ -220,15 +213,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
 
                             
 
@@ -250,15 +235,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if sda4_passes:
                             st.markdown("SDA4 selected")
                             df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "SDA4"]
@@ -277,15 +254,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if dba_passes:
                             st.markdown("DBA1 selected")
                             df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "DBA1"]
@@ -304,15 +273,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
 #----------------------------------------SGA3-------------------------------------------------
                     elif "SGA3" in data_name:
                         Pases_DF["SGA3"] = ReadXML.Read_XML(file)
@@ -335,15 +296,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
 
                             
 
@@ -365,15 +318,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if sda4_passes:
                             st.markdown("SDA4 selected")
                             df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "SDA4"]
@@ -392,15 +337,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if dba_passes:
                             st.markdown("DBA1 selected")
                             df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "DBA1"]
@@ -449,15 +386,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
 
                             
 
@@ -479,15 +408,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if sda4_passes:
                             st.markdown("SDA4 selected")
                             df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "SDA4"]
@@ -506,15 +427,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if dba_passes:
                             st.markdown("DBA1 selected")
                             df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "DBA1"]
@@ -533,15 +446,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                     elif "SGB2" in data_name:
                         Pases_DF["SGB2"] = ReadXML.Read_XML(file)
                         Pases_DF["SGB2"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB2"]["UTC_Start_Time"])
@@ -563,15 +468,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
 
                             
 
@@ -593,15 +490,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if sda4_passes:
                             st.markdown("SDA4 selected")
                             df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "SDA4"]
@@ -620,15 +509,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if dba_passes:
                             st.markdown("DBA1 selected")
                             df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "DBA1"]
@@ -647,15 +528,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                     elif "SGB3" in data_name:
                         Pases_DF["SGB3"] = ReadXML.Read_XML(file)
                         Pases_DF["SGB3"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB3"]["UTC_Start_Time"])
@@ -677,15 +550,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
 
                             
 
@@ -707,15 +572,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if sda4_passes:
                             st.markdown("SDA4 selected")
                             df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "SDA4"]
@@ -734,15 +591,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                         if dba_passes:
                             st.markdown("DBA1 selected")
                             df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "DBA1"]
@@ -761,20 +610,21 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
-            Uber_DF = Uber_DF.reset_index(drop=True)          
-            csv = Uber_DF.to_csv()
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+            Uber_DF = Uber_DF.reset_index(drop=True) 
+            # Uber_DF['#'] = pd.to_datetime(Uber_DF['#']).dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
+            # Trim milliseconds to 2 decimal places
+            Uber_DF['#'] = Uber_DF['#'].str[:-4] + 'Z'
+            new_row = pd.DataFrame([{'#': '#', 'TRUE': 'true',"Type": "D"}])
+            Uber_DF = pd.concat([new_row,Uber_DF],ignore_index=True)
+
+            csv_file = Uber_DF.to_csv(index=False, header=False)
+
+            # Use StringIO to simulate a file
             st.download_button(
                 label="Download CSV",
-                data=csv,
+                data=csv_file,
                 file_name="data.csv",
                 mime="text/csv",
                 icon=":material/download:",
