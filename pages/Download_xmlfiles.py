@@ -40,13 +40,15 @@ chrome_options.add_argument("--disable-gpu")  # Fixes issues on some systems
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")  # Helps with resource limits
  
+chrome_options.binary_location = "/usr/bin/chromium"
 
+# Point to where the chromedriver is installed
+service = Service("/usr/bin/chromedriver")
+
+# Launch browser
+driver = webdriver.Chrome(service=service, options=chrome_options)
  
 # Setup Chrome WebDriver
-
-service = Service(ChromeDriverManager().install())
-
-driver = webdriver.Chrome(service=service,options=chrome_options)
  
 # Target URL
 
