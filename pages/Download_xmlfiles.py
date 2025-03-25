@@ -34,11 +34,11 @@ st.markdown(''' This tool is for Download FDS updated xml files
 - 2. Click on Download buttons to dowload all the xml files.       
 ''')
 
-
 # Set Chrome options for headless mode
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Run in background
 chrome_options.add_argument("--disable-gpu")  # Fixes issues on some systems
+chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")  # Helps with resource limits
  
 

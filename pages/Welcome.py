@@ -19,6 +19,6 @@ Explore. Integrate. Elevate your satellite operations.
 st.markdown("**Tools:**")
 st.page_link("pages/Download_xmlfiles.py", label="Download FDS xml files", icon="⬇")
 st.page_link("pages/page_1.py", label="Export CSV to Uberlog", icon="✍️")
-st.page_link("pages/page_2.py", label="Display antennae pointing", icon="〽️")
+st.page_link("pages/page_2.py", label="Display antennae pointing", icon="📈")
 st.page_link("https://masif.eumetsat.int/mediawiki/epssg/index.php/Main_Page", label="EPS-SG Knowledge base", icon="🕵️‍♂️")
 
