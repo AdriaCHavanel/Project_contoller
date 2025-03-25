@@ -66,7 +66,7 @@ def plot_3d_vectors(radius, azimuths, elevations):
   # Display the plot
   return(fig)
 
-st.header("Controller Enhanced P2", divider="rainbow")
+st.header("Controller Enhanced", divider="rainbow")
 st.subheader("SDA and DBA pointing")
 
 st.markdown(''' This tool is for Display the azimut and elevation from a DBA file extracted from GSTMC.
