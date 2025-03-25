@@ -35,6 +35,8 @@ st.markdown(''' This tool is for Download FDS updated xml files
 ''')
 
 # Set Chrome options for headless mode
+if not os.path.exists("/usr/bin/chromium-browser"):
+    os.system("apt-get update && apt-get install -y chromium-browser chromium-chromedriver")
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Run in background
 chrome_options.add_argument("--disable-gpu")  # Fixes issues on some systems
