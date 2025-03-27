@@ -189,8 +189,8 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
 #-------------------------------SGA2----------------------------------------------------------
                     elif "SGA2" in data_name:
                         Pases_DF["SGA2"] = ReadXML.Read_XML(file)
@@ -356,15 +356,7 @@ if(s_start != None and s_end != None and ts != None and te != None):
                                         },
                                         hide_index=True,
                                     )
-                            for row in df_filtered.itertuples(index=False):
-                                Uber_DF.loc[len(Uber_DF)] = [
-                                    row.UTC_Start_Time,
-                                    'Entry',
-                                    f"#{row.Abs_Orb_No}",
-                                    row.Sat,
-                                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
-                                    "5ad5c6b7a585c614bac889cd"
-                                ]
+                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
                     elif "SGB1" in data_name:
                         Pases_DF["SGB1"] = ReadXML.Read_XML(file)
                         Pases_DF["SGB1"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB1"]["UTC_Start_Time"])
