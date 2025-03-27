@@ -17,7 +17,7 @@ def Create_FinalCSV(dataframe,ground):
                     'Info',
                     'Activity',
                     'Ground Station',
-                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
+                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp KaBAND: N/OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Total packets generated: XX <br>Az/El:xxx.xxx°/x.xxx° &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp WIMPY's Az/El: xxx° / x° </p></body></html>""",
                     "230"
                     ]
         else:
@@ -26,7 +26,7 @@ def Create_FinalCSV(dataframe,ground):
                     'Info',
                     'Activity',
                     'Spacecraft',
-                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br> {row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx/x.xxx </p></body></html>""",
+                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx°/x.xxx° </p></body></html>""",
                     "232"
                     ]
     return(Uber_DF)
