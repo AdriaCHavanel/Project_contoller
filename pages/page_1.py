@@ -78,554 +78,603 @@ Pases_DF = {
     "SGB3": pd.DataFrame
 }
 
-        
     
-s_start = st.date_input("Start of the shift:", value=None)
-ts = st.time_input("At start time:", value=None)
-st.write("Your Shift starts at:", s_start,"-",ts)
-s_end = st.date_input("End of the shift:", value=None)
-te = st.time_input("At end time:", value=None)
-st.write("Your Shift ends at:", s_end,"-",te)
-if(s_start != None and s_end != None and ts != None and te != None):
-    date_start_str = str(s_start) + "T" + str(ts)+"Z"
+#Adding a selection box instead of writing the date everytime
+#This will need an update when we will have the real shifts    
+label = "When is your shift?"
+list_ = ("Morning", "Afternoon", "Other")
+
+option = st.selectbox(
+    label,
+    list_,
+    index=None,
+    placeholder="Select shift...",
+)
+
+# Get the current date in "YYYY-MM-DD" format
+current_date = datetime.utcnow().strftime("%Y-%m-%d")
+
+# Define the fixed time
+morning_start = "08:00:00Z"
+afternoon_start = "12:30:00Z"
+afternoon_end = "18:30:00Z"
+
+
+# Combine both parts
+if option == "Morning":
+    date_start_str = f"{current_date}T{morning_start}"
+    date_end_str = f"{current_date}T{afternoon_start}"
     start_time = pd.to_datetime(date_start_str)
     # Localize to UTC
     start_time = start_time.tz_convert('UTC')
-    date_end_str = str(s_end) + "T" + str(te)+"Z"
     end_time = pd.to_datetime(date_end_str)
     # Localize to UTC
     end_time = end_time.tz_convert('UTC')
-    if (start_time < end_time):
-        ttc_check = st.toggle("Take TTC3 passes")
-        sda5_passes = st.toggle("Take SDA5 passes")
-        sda4_passes = st.toggle("Take SDA4 passes")
-        dba_passes = st.toggle("Take DBA passes")
-        if ttc_check or sda4_passes or sda5_passes or dba_passes:
-            Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
-            if uploaded_files is not None:
-                
-                for file in uploaded_files:
-                    data_name = file.name
-
-                    # Assign the DataFrame correctly
-                    if "SGA1" in data_name:
-                        Pases_DF["SGA1"] = ReadXML.Read_XML(file)
-                        Pases_DF["SGA1"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGA1"]["UTC_Start_Time"])
-                        if ttc_check:
-                            st.markdown("TTC3 selected")
-                            df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "TTC3"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
-
-                            
-
-                        if sda5_passes:
-                            st.markdown("SDA5 selected")
-                            df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "SDA5"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if sda4_passes:
-                            st.markdown("SDA4 selected")
-                            df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "SDA4"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if dba_passes:
-                            st.markdown("DBA1 selected")
-                            df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "DBA1"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-#-------------------------------SGA2----------------------------------------------------------
-                    elif "SGA2" in data_name:
-                        Pases_DF["SGA2"] = ReadXML.Read_XML(file)
-                        Pases_DF["SGA2"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGA2"]["UTC_Start_Time"])
-                        if ttc_check:
-                            st.markdown("TTC3 selected")
-                            df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "TTC3"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
-
-                            
-
-                        if sda5_passes:
-                            st.markdown("SDA5 selected")
-                            df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "SDA5"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if sda4_passes:
-                            st.markdown("SDA4 selected")
-                            df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "SDA4"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if dba_passes:
-                            st.markdown("DBA1 selected")
-                            df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "DBA1"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-#----------------------------------------SGA3-------------------------------------------------
-                    elif "SGA3" in data_name:
-                        Pases_DF["SGA3"] = ReadXML.Read_XML(file)
-                        Pases_DF["SGA3"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGA3"]["UTC_Start_Time"])
-                        if ttc_check:
-                            st.markdown("TTC3 selected")
-                            df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "TTC3"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
-
-                            
-
-                        if sda5_passes:
-                            st.markdown("SDA5 selected")
-                            df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "SDA5"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if sda4_passes:
-                            st.markdown("SDA4 selected")
-                            df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "SDA4"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if dba_passes:
-                            st.markdown("DBA1 selected")
-                            df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "DBA1"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                    elif "SGB1" in data_name:
-                        Pases_DF["SGB1"] = ReadXML.Read_XML(file)
-                        Pases_DF["SGB1"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB1"]["UTC_Start_Time"])
-                        if ttc_check:
-                            st.markdown("TTC3 selected")
-                            df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "TTC3"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
-
-                            
-
-                        if sda5_passes:
-                            st.markdown("SDA5 selected")
-                            df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "SDA5"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if sda4_passes:
-                            st.markdown("SDA4 selected")
-                            df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "SDA4"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if dba_passes:
-                            st.markdown("DBA1 selected")
-                            df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "DBA1"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                    elif "SGB2" in data_name:
-                        Pases_DF["SGB2"] = ReadXML.Read_XML(file)
-                        Pases_DF["SGB2"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB2"]["UTC_Start_Time"])
-                        if ttc_check:
-                            st.markdown("TTC3 selected")
-                            df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "TTC3"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
-
-                            
-
-                        if sda5_passes:
-                            st.markdown("SDA5 selected")
-                            df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "SDA5"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if sda4_passes:
-                            st.markdown("SDA4 selected")
-                            df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "SDA4"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if dba_passes:
-                            st.markdown("DBA1 selected")
-                            df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "DBA1"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                    elif "SGB3" in data_name:
-                        Pases_DF["SGB3"] = ReadXML.Read_XML(file)
-                        Pases_DF["SGB3"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB3"]["UTC_Start_Time"])
-                        if ttc_check:
-                            st.markdown("TTC3 selected")
-                            df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "TTC3"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
-
-                            
-
-                        if sda5_passes:
-                            st.markdown("SDA5 selected")
-                            df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "SDA5"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if sda4_passes:
-                            st.markdown("SDA4 selected")
-                            df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "SDA4"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-                        if dba_passes:
-                            st.markdown("DBA1 selected")
-                            df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "DBA1"]
-                            df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
-                            df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
-                            df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
-                            df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
-                            st.dataframe(
-                                        df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
-                                        column_config={
-                                            "Sat": "Satellite",
-                                            "Abs_Orb_no": "Orbit Number",
-                                            "AOS": "AoS",
-                                            "LOS": "LoS",
-                                            "Entity": "Antenna",
-                                        },
-                                        hide_index=True,
-                                    )
-                            Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
-            Uber_DF = Uber_DF.reset_index(drop=True) 
-            # Uber_DF['#'] = pd.to_datetime(Uber_DF['#']).dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-
-            # Trim milliseconds to 2 decimal places
-            Uber_DF['#'] = Uber_DF['#'].str[:-4] + 'Z'
-            new_row = pd.DataFrame([{'#': '#', 'TRUE': 'true',"Type": "D"}])
-            Uber_DF = pd.concat([new_row,Uber_DF],ignore_index=True)
-
-            csv_file = Uber_DF.to_csv(index=False, header=False)
-
-            # Use StringIO to simulate a file
-            st.download_button(
-                label="Download CSV",
-                data=csv_file,
-                file_name="data.csv",
-                mime="text/csv",
-                icon=":material/download:",
-                )  
-        else:
-              st.markdown("Introdue a valid Station ")
+elif option == "Afternoon":
+    date_start_str = f"{current_date}T{morning_start}"
+    date_end_str = f"{current_date}T{afternoon_end}"
+    start_time = pd.to_datetime(date_start_str)
+    # Localize to UTC
+    start_time = start_time.tz_convert('UTC')
+    end_time = pd.to_datetime(date_end_str)
+    # Localize to UTC
+    end_time = end_time.tz_convert('UTC')
+elif option == "Other":
+    s_start = st.date_input("Start of the shift:", value=None)
+    ts = st.time_input("At start time:", value=None)
+    st.write("Your Shift starts at:", s_start,"-",ts)
+    s_end = st.date_input("End of the shift:", value=None)
+    te = st.time_input("At end time:", value=None)
+    st.write("Your Shift ends at:", s_end,"-",te)
+    if(s_start != None and s_end != None and ts != None and te != None):
+        date_start_str = str(s_start) + "T" + str(ts)+"Z"
+        start_time = pd.to_datetime(date_start_str)
+        # Localize to UTC
+        start_time = start_time.tz_convert('UTC')
+        date_end_str = str(s_end) + "T" + str(te)+"Z"
+        end_time = pd.to_datetime(date_end_str)
+        # Localize to UTC
+        end_time = end_time.tz_convert('UTC')
     else:
-        st.markdown("Introdue a valid start and end Date ")
+            st.error("Introdue a valid time window ", icon="🚨")
+            start_time = int(0) #Placeholders
+            end_time = int(0) #Placeholders
 else:
-    st.markdown("Introdue a valid start and end Date ")
+    st.error("Introdue a valid shift ", icon="🚨")
+    start_time = int(0) #Placeholders
+    end_time = int(0) #Placeholders
+
+
+if (start_time < end_time) and option:
+            ttc_check = st.toggle("Take TTC3 passes")
+            sda5_passes = st.toggle("Take SDA5 passes")
+            sda4_passes = st.toggle("Take SDA4 passes")
+            dba_passes = st.toggle("Take DBA passes")
+            if ttc_check or sda4_passes or sda5_passes or dba_passes:
+                Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
+                if uploaded_files is not None:
+                    
+                    for file in uploaded_files:
+                        data_name = file.name
+    
+                        # Assign the DataFrame correctly
+                        if "SGA1" in data_name:
+                            Pases_DF["SGA1"] = ReadXML.Read_XML(file)
+                            Pases_DF["SGA1"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGA1"]["UTC_Start_Time"])
+                            if ttc_check:
+                                st.markdown("TTC3 selected")
+                                df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "TTC3"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
+    
+                                
+    
+                            if sda5_passes:
+                                st.markdown("SDA5 selected")
+                                df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "SDA5"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if sda4_passes:
+                                st.markdown("SDA4 selected")
+                                df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "SDA4"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if dba_passes:
+                                st.markdown("DBA1 selected")
+                                df_filtered = Pases_DF["SGA1"][Pases_DF["SGA1"]["Entity"] == "DBA1"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                    
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+    #-------------------------------SGA2----------------------------------------------------------
+                        elif "SGA2" in data_name:
+                            Pases_DF["SGA2"] = ReadXML.Read_XML(file)
+                            Pases_DF["SGA2"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGA2"]["UTC_Start_Time"])
+                            if ttc_check:
+                                st.markdown("TTC3 selected")
+                                df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "TTC3"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
+    
+                                
+    
+                            if sda5_passes:
+                                st.markdown("SDA5 selected")
+                                df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "SDA5"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if sda4_passes:
+                                st.markdown("SDA4 selected")
+                                df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "SDA4"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if dba_passes:
+                                st.markdown("DBA1 selected")
+                                df_filtered = Pases_DF["SGA2"][Pases_DF["SGA2"]["Entity"] == "DBA1"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+    #----------------------------------------SGA3-------------------------------------------------
+                        elif "SGA3" in data_name:
+                            Pases_DF["SGA3"] = ReadXML.Read_XML(file)
+                            Pases_DF["SGA3"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGA3"]["UTC_Start_Time"])
+                            if ttc_check:
+                                st.markdown("TTC3 selected")
+                                df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "TTC3"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
+    
+                                
+    
+                            if sda5_passes:
+                                st.markdown("SDA5 selected")
+                                df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "SDA5"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if sda4_passes:
+                                st.markdown("SDA4 selected")
+                                df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "SDA4"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if dba_passes:
+                                st.markdown("DBA1 selected")
+                                df_filtered = Pases_DF["SGA3"][Pases_DF["SGA3"]["Entity"] == "DBA1"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                        elif "SGB1" in data_name:
+                            Pases_DF["SGB1"] = ReadXML.Read_XML(file)
+                            Pases_DF["SGB1"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB1"]["UTC_Start_Time"])
+                            if ttc_check:
+                                st.markdown("TTC3 selected")
+                                df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "TTC3"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
+    
+                                
+    
+                            if sda5_passes:
+                                st.markdown("SDA5 selected")
+                                df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "SDA5"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if sda4_passes:
+                                st.markdown("SDA4 selected")
+                                df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "SDA4"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if dba_passes:
+                                st.markdown("DBA1 selected")
+                                df_filtered = Pases_DF["SGB1"][Pases_DF["SGB1"]["Entity"] == "DBA1"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                        elif "SGB2" in data_name:
+                            Pases_DF["SGB2"] = ReadXML.Read_XML(file)
+                            Pases_DF["SGB2"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB2"]["UTC_Start_Time"])
+                            if ttc_check:
+                                st.markdown("TTC3 selected")
+                                df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "TTC3"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
+    
+                                
+    
+                            if sda5_passes:
+                                st.markdown("SDA5 selected")
+                                df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "SDA5"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if sda4_passes:
+                                st.markdown("SDA4 selected")
+                                df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "SDA4"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if dba_passes:
+                                st.markdown("DBA1 selected")
+                                df_filtered = Pases_DF["SGB2"][Pases_DF["SGB2"]["Entity"] == "DBA1"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                        elif "SGB3" in data_name:
+                            Pases_DF["SGB3"] = ReadXML.Read_XML(file)
+                            Pases_DF["SGB3"]["UTC_Start_Time"] = pd.to_datetime(Pases_DF["SGB3"]["UTC_Start_Time"])
+                            if ttc_check:
+                                st.markdown("TTC3 selected")
+                                df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "TTC3"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,False)], ignore_index=True)
+    
+                                
+    
+                            if sda5_passes:
+                                st.markdown("SDA5 selected")
+                                df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "SDA5"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if sda4_passes:
+                                st.markdown("SDA4 selected")
+                                df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "SDA4"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                            if dba_passes:
+                                st.markdown("DBA1 selected")
+                                df_filtered = Pases_DF["SGB3"][Pases_DF["SGB3"]["Entity"] == "DBA1"]
+                                df_filtered = df_filtered[(df_filtered["UTC_Start_Time"] >= start_time) & (df_filtered["UTC_Start_Time"] <= end_time)]
+                                df_filtered = df_filtered.loc[df_filtered.groupby(['Abs_Orb_No', 'Entity'])['Duration'].idxmax()]
+                                df_filtered["AOS"] = df_filtered["UTC_Start_Time"].dt.strftime("%H:%M")
+                                df_filtered["LOS"] = (df_filtered["UTC_Start_Time"] + pd.to_timedelta(df_filtered["Duration"], unit="ms")).dt.strftime("%H:%M")
+                                st.dataframe(
+                                            df_filtered[["Sat","Abs_Orb_No","AOS", "LOS","Entity"]],
+                                            column_config={
+                                                "Sat": "Satellite",
+                                                "Abs_Orb_no": "Orbit Number",
+                                                "AOS": "AoS",
+                                                "LOS": "LoS",
+                                                "Entity": "Antenna",
+                                            },
+                                            hide_index=True,
+                                        )
+                                Uber_DF = pd.concat([Uber_DF, Create_FinalCSV(df_filtered,True)], ignore_index=True)
+                Uber_DF = Uber_DF.reset_index(drop=True) 
+                # Uber_DF['#'] = pd.to_datetime(Uber_DF['#']).dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    
+                # Trim milliseconds to 2 decimal places
+                Uber_DF['#'] = Uber_DF['#'].str[:-4] + 'Z'
+                new_row = pd.DataFrame([{'#': '#', 'TRUE': 'true',"Type": "D"}])
+                Uber_DF = pd.concat([new_row,Uber_DF],ignore_index=True)
+    
+                csv_file = Uber_DF.to_csv(index=False, header=False)
+    
+                # Use StringIO to simulate a file
+                st.download_button(
+                    label="Download CSV",
+                    data=csv_file,
+                    file_name="data.csv",
+                    mime="text/csv",
+                    #icon=":material/download:",
+                    )  
+            else:
+                  st.markdown("Introdue a valid Station ")
+else:
+            st.markdown("Introdue a valid start and end Date ")
+
 
 
