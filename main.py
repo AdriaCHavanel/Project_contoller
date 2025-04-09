@@ -1,5 +1,5 @@
 import streamlit as st
-logoname = "LOGO_COntroller.png"
+logoname = "../LOGO_COntroller.png"
 st.logo(logoname, icon_image=logoname)
 pages = {
     "Main": [
@@ -10,6 +10,10 @@ pages = {
         st.Page("pages/page_1.py", title="Export Uberlog"),
         st.Page("pages/page_2.py", title="SDA and DBA pointer"),
         st.Page("pages/Download_xmlfiles.py", title="Download FDS xml files"),
+        st.Page("pages/GroundTrack.py", title="Satellite GroundTrack"),
+        st.Page("pages/dailyops.py", title="DailyOps Uberlog"),
+
+
     ],
    # "Assistant": [
    #     st.Page("pages/controller_assistant.py", title="Controller Assistant"),
