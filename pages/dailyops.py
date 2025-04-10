@@ -19,62 +19,65 @@ def str2datetime(string):
 
 def ReadFirstPass(df, station, shift):
 
+    if df is not None:
+        print(uploaded_files)
 
-    # Define the fixed time
-    morning_start = "08:00:00Z"
-    afternoon_start = "12:30:00Z"
-    afternoon_end = "18:30:00Z"
-    night_end = "23:30:00Z"
-    
-    # Combine both parts
-    if shift == "Morning":
-        date_start_str = f"{current_date}T{morning_start}"
-        date_end_str = f"{current_date}T{afternoon_start}"
-        start_time = pd.to_datetime(date_start_str)
-        # Localize to UTC
-        start_time = start_time.tz_convert('UTC')
-        end_time = pd.to_datetime(date_end_str)
-        # Localize to UTC
-        end_time = end_time.tz_convert('UTC')
-    elif shift == "Afternoon":
-        date_start_str = f"{current_date}T{afternoon_start}"
-        date_end_str = f"{current_date}T{afternoon_end}"
-        start_time = pd.to_datetime(date_start_str)
-        # Localize to UTC
-        start_time = start_time.tz_convert('UTC')
-        end_time = pd.to_datetime(date_end_str)
-        # Localize to UTC
-        end_time = end_time.tz_convert('UTC')
-    elif shift == "Night":
-        date_start_str = f"{current_date}T{afternoon_end}"
-        date_end_str = f"{current_date}T{night_end}"
-        start_time = pd.to_datetime(date_start_str)
-        # Localize to UTC
-        start_time = start_time.tz_convert('UTC')
-        end_time = pd.to_datetime(date_end_str)
-        # Localize to UTC
-        end_time = end_time.tz_convert('UTC')
-         
-         
+        # Define the fixed time
+        morning_start = "08:00:00Z"
+        afternoon_start = "12:30:00Z"
+        afternoon_end = "18:30:00Z"
+        night_end = "23:30:00Z"
         
-    
-    event_types_to_keep = ["STAT_VIS_Z"]  #STAT_VIS_Z should be AOS0!!!
-
-    # Filter Station (Depends if I am searching for the first SDA, DBA or TTC3)
-
-    filtered_df = df[df["Event_Type"].isin(event_types_to_keep)] #I'm filtering the columns
-    filtered_df = filtered_df[filtered_df['Entity'].isin(station)]
-    filtered_df = filtered_df[(filtered_df["UTC_Start_Time"].apply(str2datetime)  >= start_time) & 
-    (filtered_df["UTC_Start_Time"].apply(str2datetime)  <= end_time)]
+        # Combine both parts
+        if shift == "Morning":
+            date_start_str = f"{current_date}T{morning_start}"
+            date_end_str = f"{current_date}T{afternoon_start}"
+            start_time = pd.to_datetime(date_start_str)
+            # Localize to UTC
+            start_time = start_time.tz_convert('UTC')
+            end_time = pd.to_datetime(date_end_str)
+            # Localize to UTC
+            end_time = end_time.tz_convert('UTC')
+        elif shift == "Afternoon":
+            date_start_str = f"{current_date}T{afternoon_start}"
+            date_end_str = f"{current_date}T{afternoon_end}"
+            start_time = pd.to_datetime(date_start_str)
+            # Localize to UTC
+            start_time = start_time.tz_convert('UTC')
+            end_time = pd.to_datetime(date_end_str)
+            # Localize to UTC
+            end_time = end_time.tz_convert('UTC')
+        elif shift == "Night":
+            date_start_str = f"{current_date}T{afternoon_end}"
+            date_end_str = f"{current_date}T{night_end}"
+            start_time = pd.to_datetime(date_start_str)
+            # Localize to UTC
+            start_time = start_time.tz_convert('UTC')
+            end_time = pd.to_datetime(date_end_str)
+            # Localize to UTC
+            end_time = end_time.tz_convert('UTC')
+            
+            
+            
         
-        #first shift pass of the station:
-        #print(type(filtered_df['UTC_Start_Time'].iloc[0])) #It.s DONE, just put return instead of print!!!
+        event_types_to_keep = ["STAT_VIS_Z"]  #STAT_VIS_Z should be AOS0!!!
 
-    return filtered_df['UTC_Start_Time'].iloc[0]
+        # Filter Station (Depends if I am searching for the first SDA, DBA or TTC3)
+
+        filtered_df = df[df["Event_Type"].isin(event_types_to_keep)] #I'm filtering the columns
+        filtered_df = filtered_df[filtered_df['Entity'].isin(station)]
+        filtered_df = filtered_df[(filtered_df["UTC_Start_Time"].apply(str2datetime)  >= start_time) & 
+        (filtered_df["UTC_Start_Time"].apply(str2datetime)  <= end_time)]
+            
+            #first shift pass of the station:
+            #print(type(filtered_df['UTC_Start_Time'].iloc[0])) #It.s DONE, just put return instead of print!!!
+
+        return filtered_df['UTC_Start_Time'].iloc[0]
 
 
 
 def parse_and_merge_multiple(files) -> pd.DataFrame:
+
     if files:
         namespaces = {"cf": "http://eop-cfi.esa.int/CFI"}
         dfs = []
@@ -109,7 +112,6 @@ list_2 = ("Morning", "Afternoon", "Night")
 option2 = st.selectbox(
     label2,
     list_2,
-    index=None,
     placeholder="Select shift...",
 )
 
@@ -131,6 +133,9 @@ option = st.selectbox(
     placeholder="Select shift...",
 
 )
+
+if option2 == 'Night':
+    st.warning("Be careful, we are not doing Night shifts yet! The time slots are not reliable.")
 
 Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
 
@@ -157,7 +162,6 @@ if option == 'Groundcon':
     GSTMC_Rep_type = "Checks"
 
 
-    #ReadFirstPass(uploaded_files, ["SDA4"], option2)
 
     SDA_Rep_label = "SDA Reports"
     #SDA_Rep = st.checkbox(SDA_Rep_label, value=False)
@@ -280,9 +284,9 @@ else:
     SYSLOG = True
     #SYSLOG = st.checkbox(SYSLOG_label, value=False)
     SYSLOG_msg = "!!! Log inside the pass you clear the log !!!"
-    SYSLOG_time = ReadFirstPass(merged_df, ["TTC3"], option2) #To be changed to the 1st pass of the shift!!!!
-    SYSLOG_group = "EPSSG-A1"   #!!!!You have to change this wrt the satellite you want to input!!!!!!
-    SYSLOG_type = "Checks"
+    SYSLOG_time = ReadFirstPass(merged_df, ["TTC3"], option2) 
+    SYSLOG_group = "Spacecraft"   #!!!!You have to change this wrt the satellite you want to input!!!!!!
+    SYSLOG_type = "EPSSG-A1"
 
     MPS_PROD_label = "MPS product receptions"
     #MPS_PROD = st.checkbox(MPS_PROD_label, value=False)

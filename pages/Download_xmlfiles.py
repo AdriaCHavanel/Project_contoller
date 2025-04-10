@@ -44,6 +44,9 @@ chrome_options.add_argument("--disable-dev-shm-usage")  # Helps with resource li
 
 # Setup Chrome WebDriver
 service = Service(ChromeDriverManager().install())
+
+# Point to where the chromedriver is installed
+#service = Service("/usr/bin/chromedriver")
 driver = webdriver.Chrome(service=service, options=chrome_options)
  
 # Setup Chrome WebDriver
