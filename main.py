@@ -10,7 +10,7 @@ pages = {
         st.Page("pages/page_1.py", title="Export Uberlog"),
         st.Page("pages/page_2.py", title="SDA and DBA pointer"),
         st.Page("pages/Download_xmlfiles.py", title="Download FDS xml files"),
-        st.Page("pages/GroundTrack.py", title="Satellite GroundTrack"),
+        st.Page("pages/BatchGen.py", title="Final Batch Gen"),
         st.Page("pages/dailyops.py", title="DailyOps Uberlog"),
 
 
