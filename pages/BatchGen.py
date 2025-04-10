@@ -217,7 +217,7 @@ if (start_time < end_time) and option:
 
                 #The first row of the df. Everything will be concatenated from this one.
                 Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
-                if uploaded_files is not None:
+                if uploaded_files:
                     
                 
                     #data_name = file.name
