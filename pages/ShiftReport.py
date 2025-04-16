@@ -146,7 +146,7 @@ if (start_time < end_time) and option:
                         "TC": TC,
                         "Comments": comment.replace('\xa0', '').strip(),
                     }
-                    new_df_GND = pd.concat([new_df_SPACE, pd.DataFrame([new_row])], ignore_index=True)
+                    new_df_SPACE = pd.concat([new_df_SPACE, pd.DataFrame([new_row])], ignore_index=True)
 
                 else:
                     orbit = row["text"].split("#")[1][:5]
