@@ -1,12 +1,22 @@
+"""
+
+Created on Tue Apr 15 10:00:14 2025
+ 
+Daily Ops Batch Gen 
+@author: Sapuppo Andre
+
+"""
+
+
 import streamlit as st
 import pandas as pd
-import numpy as np
-from libraries import ReadXML
+#import numpy as np
+#from libraries import ReadXML
 from datetime import datetime, date, timezone
 import re
-import csv
-from io import StringIO
-import time
+#import csv
+#from io import StringIO
+#import time
 #from pages.dailyops import parse_and_merge_multiple
 
 def str2datetime(string):
@@ -132,10 +142,10 @@ option = st.selectbox(
 # Get the current date in "YYYY-MM-DD" format
 current_date = datetime.utcnow().strftime("%Y-%m-%d")
 
-# Define the fixed time
-morning_start = "08:00:00Z"
-afternoon_start = "12:30:00Z"
-afternoon_end = "18:30:00Z"
+# Define the fixed time (To fix when the date changes again!)
+morning_start = "06:00:00Z"
+afternoon_start = "10:30:00Z"
+afternoon_end = "16:30:00Z"
 
 
 # Combine both parts
@@ -208,7 +218,7 @@ else:
 
 event_types_to_keep = ["STAT_VIS_Z"]  #I only keep tha AOS0!
 
-if (start_time < end_time) and option:
+if (start_time < end_time) and option and option2:
             #ttc_check = st.toggle("Take TTC3 passes")
             #sda5_passes = st.toggle("Take SDA5 passes")
             #sda4_passes = st.toggle("Take SDA4 passes")
@@ -218,6 +228,7 @@ if (start_time < end_time) and option:
                 #The first row of the df. Everything will be concatenated from this one.
                 Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
                 if uploaded_files:
+                    print(uploaded_files)
                     
                 
                     #data_name = file.name
