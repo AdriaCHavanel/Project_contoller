@@ -118,10 +118,10 @@ option2 = st.selectbox(
 # Get the current date in "YYYY-MM-DD" format
 current_date = datetime.utcnow().strftime("%Y-%m-%d")
 
-# Define the fixed time
-morning_start = "08:00:00Z"
-afternoon_start = "12:30:00Z"
-afternoon_end = "18:30:00Z"
+# Define the fixed time (To fix when the date changes again!)
+morning_start = "06:00:00Z"
+afternoon_start = "10:30:00Z"
+afternoon_end = "16:30:00Z"
 
 #Select if Spacon or Groundcon
 label = "Are you Groundcon or Spacon?"

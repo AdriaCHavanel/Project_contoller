@@ -12,6 +12,7 @@ pages = {
         st.Page("pages/Download_xmlfiles.py", title="Download FDS xml files"),
         st.Page("pages/BatchGen.py", title="Final Batch Gen"),
         st.Page("pages/dailyops.py", title="DailyOps Uberlog"),
+        st.Page("pages/ShiftReport.py", title="Shift Reports Downloader"),
 
 
     ],
