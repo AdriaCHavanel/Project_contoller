@@ -68,7 +68,7 @@ if option == "Morning":
     # Localize to UTC
     end_time = end_time.tz_convert('UTC')
 elif option == "Afternoon":
-    date_start_str = f"{current_date}T{morning_start}"
+    date_start_str = f"{current_date}T{afternoon_start}"
     date_end_str = f"{current_date}T{afternoon_end}"
     start_time = pd.to_datetime(date_start_str)
     # Localize to UTC
