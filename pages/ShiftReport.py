@@ -170,7 +170,7 @@ if (start_time < end_time) and option:
 
         # Step 4: Export to a new file
         try:
-            new_df = new_df_GND
+            new_df = new_df_SPACE
         except NameError:
             new_df = new_df_SPACE
         csv_file = new_df.to_csv(index=False, header=True)
