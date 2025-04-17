@@ -53,7 +53,7 @@ def Create_FinalCSV(dataframe,ground):
     for row in dataframe.itertuples(index=False):
         if(ground):
                 if row.Entity == "SDA4": message_str = f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp<b>{row.Sat}<b> #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp KaBAND: N/OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Total packets generated: XX <br>Az/El:xxx.xxx°/x.xxx° &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp WIMPY's Az/El: xxx° / x° </p></body></html>"""
-                if row.Entity == "MCM": message_str = f"<html><body><p>{row.AOS} - <b>{row.Sat}<b> &nbsp &nbsp &nbsp &nbsp #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity} &nbsp &nbsp &nbsp KaBAND: OK </p></body></html>"
+                if row.Entity == "MCM": message_str = f"<html><body><p>{row.AOS} - AOS <b>{row.Sat}<b> &nbsp &nbsp &nbsp &nbsp #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity} &nbsp &nbsp &nbsp KaBAND: OK </p></body></html>"
                 if row.Entity == "DBA1": message_str = f"<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp <b>{row.Sat}<b> &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}  &nbsp &nbsp  &nbsp &nbsp Az/El:  xxx.xxx&deg; / 0.2&deg;<br>Insert Text Here<br>{row.LOS} - LOS  &nbsp &nbsp &nbsp &nbsp X-BAND: OK &nbsp &nbsp Total packets generated:  xxxxxx.0<br></p></body></html>"
 
                 Uber_DF.loc[len(Uber_DF)] = [
