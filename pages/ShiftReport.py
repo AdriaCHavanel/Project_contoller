@@ -60,6 +60,7 @@ afternoon_end = "18:30:00"
 local_tz = "Europe/Berlin"
 
 
+
 # Combine both parts
 if option == "Morning":
     date_start_str = f"{current_date}T{morning_start}"
@@ -70,6 +71,7 @@ if option == "Morning":
     end_time = pd.to_datetime(date_end_str)
     # Localize to UTC
     end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
+
 elif option == "Afternoon":
     date_start_str = f"{current_date}T{afternoon_start}"
     date_end_str = f"{current_date}T{afternoon_end}"
@@ -79,6 +81,7 @@ elif option == "Afternoon":
     end_time = pd.to_datetime(date_end_str)
     # Localize to UTC
     end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
+
 elif option == "Other":
     s_start = st.date_input("Start of the shift:", value=None)
     ts = st.time_input("At start time:", value=None)
@@ -95,6 +98,7 @@ elif option == "Other":
         end_time = pd.to_datetime(date_end_str)
         # Localize to UTC
         end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
+
     else:
             st.error("Introdue a valid time window ", icon="🚨")
             start_time = int(0) #Placeholders
@@ -114,6 +118,7 @@ if (start_time < end_time) and option:
         print(uploaded_file.name)
         print(start_time)
         print(end_time)
+
         df = pd.read_csv(uploaded_file)
         df["timestamp"] = pd.to_datetime(df["timestamp"])
         # Step 2: Filter rows where "Time" column contains a specific value (e.g. "12:00")
@@ -123,6 +128,7 @@ if (start_time < end_time) and option:
         new_df_GND = pd.DataFrame(columns=["Satellite", "Orbit", "Antenna", "DOY", "AOS", "LOS", "SMD", "Comments"])
         new_df_SPACE = pd.DataFrame(columns=["Satellite", "Orbit", "Antenna", "DOY", "AOS", "LOS", "SMD","TM","TC", "Comments"])
         DOY = datetime.now().timetuple().tm_yday
+
         # Loop through each row of the original DataFrame
         for index, row in df_filtered.iterrows():
             # Apply transformation logic per row
@@ -176,13 +182,14 @@ if (start_time < end_time) and option:
         # Step 4: Export to a new file
         if not new_df_SPACE.empty:
             new_df = new_df_SPACE
-            print("AOOOOOOOOOOO")
+            #print("AOOOOOOOOOOO")
         elif not new_df_GND.empty:
             new_df = new_df_GND
-            print("PEPPEEEEEEEEE")
+            #print("PEPPEEEEEEEEE")
         else:
             st.error("DataFrame Error: Not possible to create the CSV, please try again.")
             new_df = pd.DataFrame()
+
         csv_file = new_df.to_csv(index=False, header=True)
         # Or to Excel:
         #csv_file = new_df.to_excel('ShiftRepor.xlsx', index=False)

@@ -151,6 +151,7 @@ morning_start = "08:00:00"
 afternoon_start = "12:30:00"
 afternoon_end = "18:30:00"
 
+
 #Localize the timezone
 local_tz = "Europe/Berlin"
 
