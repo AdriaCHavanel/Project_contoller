@@ -23,10 +23,13 @@ def ReadFirstPass(df, station, shift):
         print(uploaded_files)
 
         # Define the fixed time
-        morning_start = "08:00:00Z"
-        afternoon_start = "12:30:00Z"
-        afternoon_end = "18:30:00Z"
-        night_end = "23:30:00Z"
+        morning_start = "08:00:00"
+        afternoon_start = "12:30:00"
+        afternoon_end = "18:30:00"
+        night_end = "23:30:00"
+
+        #Localize the timezone
+        local_tz = "Europe/Berlin"
         
         # Combine both parts
         if shift == "Morning":
@@ -34,28 +37,28 @@ def ReadFirstPass(df, station, shift):
             date_end_str = f"{current_date}T{afternoon_start}"
             start_time = pd.to_datetime(date_start_str)
             # Localize to UTC
-            start_time = start_time.tz_convert('UTC')
+            start_time = start_time.tz_localize(local_tz).tz_convert('UTC')
             end_time = pd.to_datetime(date_end_str)
             # Localize to UTC
-            end_time = end_time.tz_convert('UTC')
+            end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
         elif shift == "Afternoon":
             date_start_str = f"{current_date}T{afternoon_start}"
             date_end_str = f"{current_date}T{afternoon_end}"
             start_time = pd.to_datetime(date_start_str)
             # Localize to UTC
-            start_time = start_time.tz_convert('UTC')
+            start_time = start_time.tz_localize(local_tz).tz_convert('UTC')
             end_time = pd.to_datetime(date_end_str)
             # Localize to UTC
-            end_time = end_time.tz_convert('UTC')
+            end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
         elif shift == "Night":
             date_start_str = f"{current_date}T{afternoon_end}"
             date_end_str = f"{current_date}T{night_end}"
             start_time = pd.to_datetime(date_start_str)
             # Localize to UTC
-            start_time = start_time.tz_convert('UTC')
+            start_time = start_time.tz_localize(local_tz).tz_convert('UTC')
             end_time = pd.to_datetime(date_end_str)
             # Localize to UTC
-            end_time = end_time.tz_convert('UTC')
+            end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
             
             
             
@@ -180,7 +183,7 @@ if option == 'Groundcon':
     DBA_Rep_type = "Checks"
 
 
-    print(DBA_Rep_time)
+    #print(DBA_Rep_time)
 
     SDA_OEM_label = "SDA OEMs"
     SDA_OEM = False
