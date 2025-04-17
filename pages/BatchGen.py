@@ -49,7 +49,7 @@ def parse_and_merge_multiple(files) -> pd.DataFrame:
 def Create_FinalCSV(dataframe,ground):
     
     Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
-    dataframe["UTC_Start_Time"] = (dataframe["UTC_Start_Time"] + pd.to_timedelta(dataframe["Duration"], unit="ms")).dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    #dataframe["UTC_End_Time"] = (dataframe["UTC_Start_Time"] + pd.to_timedelta(dataframe["Duration"], unit="ms")).dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     for row in dataframe.itertuples(index=False):
         if(ground):
                 if row.Entity == "SDA4": message_str = f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp KaBAND: N/OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Total packets generated: XX <br>Az/El:xxx.xxx°/x.xxx° &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp WIMPY's Az/El: xxx° / x° </p></body></html>"""
