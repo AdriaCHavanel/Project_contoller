@@ -1,12 +1,22 @@
+"""
+
+Created on Tue Apr 15 10:00:14 2025
+ 
+Daily Ops Batch Gen 
+@author: Sapuppo Andre
+
+"""
+
+
 import streamlit as st
 import pandas as pd
-import numpy as np
-from libraries import ReadXML
+#import numpy as np
+#from libraries import ReadXML
 from datetime import datetime, date, timezone
 import re
-import csv
-from io import StringIO
-import time
+#import csv
+#from io import StringIO
+#import time
 #from pages.dailyops import parse_and_merge_multiple
 
 def str2datetime(string):
@@ -42,12 +52,16 @@ def Create_FinalCSV(dataframe,ground):
     dataframe["UTC_Start_Time"] = (dataframe["UTC_Start_Time"] + pd.to_timedelta(dataframe["Duration"], unit="ms")).dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     for row in dataframe.itertuples(index=False):
         if(ground):
+                if row.Entity == "SDA4": message_str = f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp KaBAND: N/OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Total packets generated: XX <br>Az/El:xxx.xxx°/x.xxx° &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp WIMPY's Az/El: xxx° / x° </p></body></html>"""
+                if row.Entity == "MCM": message_str = f"<html><body><p>{row.AOS} - {row.Sat} &nbsp &nbsp &nbsp &nbsp #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity} &nbsp &nbsp &nbsp KaBAND: OK </p></body></html>"
+                if row.Entity == "DBA1": message_str = f"<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp {row.Sat} &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}  &nbsp &nbsp  &nbsp &nbsp Az/El:  xxx.xxx&deg; / 0.2&deg;<br>Insert Text Here<br>{row.LOS} - LOS  &nbsp &nbsp &nbsp &nbsp X-BAND: OK &nbsp &nbsp Total packets generated:  xxxxxx.0<br></p></body></html>"
+
                 Uber_DF.loc[len(Uber_DF)] = [
                     row.UTC_Start_Time,
                     'Info',
                     'Activity',
                     'Ground Station',
-                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat} #{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp #{row.Entity}<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp KaBAND: N/OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Total packets generated: XX <br>Az/El:xxx.xxx°/x.xxx° &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp WIMPY's Az/El: xxx° / x° </p></body></html>""",
+                    message_str,
                     "230"
                     ]
         else:
@@ -56,7 +70,7 @@ def Create_FinalCSV(dataframe,ground):
                     'Info',
                     'Activity',
                     'Spacecraft',
-                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Sat}#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx°/x.xxx° </p></body></html>""",
+                    f"""<html><body><p>{row.AOS} - AOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp#{row.Sat}&nbsp &nbsp &nbsp#{row.Abs_Orb_No} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{row.Entity}/BBUX &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TM: OK &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp TC: OK<br>Insert Pass Text Here<br>{row.LOS} - LOS &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Az/El:xxx.xxx°/x.xxx° </p></body></html>""",
                     "232"
                     ]
     return(Uber_DF)
@@ -132,11 +146,13 @@ option = st.selectbox(
 # Get the current date in "YYYY-MM-DD" format
 current_date = datetime.utcnow().strftime("%Y-%m-%d")
 
-# Define the fixed time
-morning_start = "08:00:00Z"
-afternoon_start = "12:30:00Z"
-afternoon_end = "18:30:00Z"
+# Define the fixed time (To fix when the date changes again!)
+morning_start = "08:00:00"
+afternoon_start = "12:30:00"
+afternoon_end = "18:30:00"
 
+#Localize the timezone
+local_tz = "Europe/Berlin"
 
 # Combine both parts
 if option == "Morning":
@@ -144,19 +160,19 @@ if option == "Morning":
     date_end_str = f"{current_date}T{afternoon_start}"
     start_time = pd.to_datetime(date_start_str)
     # Localize to UTC
-    start_time = start_time.tz_convert('UTC')
+    start_time = start_time.tz_localize(local_tz).tz_convert('UTC')
     end_time = pd.to_datetime(date_end_str)
     # Localize to UTC
-    end_time = end_time.tz_convert('UTC')
+    end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
 elif option == "Afternoon":
-    date_start_str = f"{current_date}T{morning_start}"
+    date_start_str = f"{current_date}T{afternoon_start}"
     date_end_str = f"{current_date}T{afternoon_end}"
     start_time = pd.to_datetime(date_start_str)
     # Localize to UTC
-    start_time = start_time.tz_convert('UTC')
+    start_time = start_time.tz_localize(local_tz).tz_convert('UTC')
     end_time = pd.to_datetime(date_end_str)
     # Localize to UTC
-    end_time = end_time.tz_convert('UTC')
+    end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
 elif option == "Other":
     s_start = st.date_input("Start of the shift:", value=None)
     ts = st.time_input("At start time:", value=None)
@@ -168,11 +184,11 @@ elif option == "Other":
         date_start_str = str(s_start) + "T" + str(ts)+"Z"
         start_time = pd.to_datetime(date_start_str)
         # Localize to UTC
-        start_time = start_time.tz_convert('UTC')
+        start_time = start_time.tz_localize(local_tz).tz_convert('UTC')
         date_end_str = str(s_end) + "T" + str(te)+"Z"
         end_time = pd.to_datetime(date_end_str)
         # Localize to UTC
-        end_time = end_time.tz_convert('UTC')
+        end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
     else:
             st.error("Introdue a valid time window ", icon="🚨")
             start_time = int(0) #Placeholders
@@ -208,7 +224,7 @@ else:
 
 event_types_to_keep = ["STAT_VIS_Z"]  #I only keep tha AOS0!
 
-if (start_time < end_time) and option:
+if (start_time < end_time) and option and option2:
             #ttc_check = st.toggle("Take TTC3 passes")
             #sda5_passes = st.toggle("Take SDA5 passes")
             #sda4_passes = st.toggle("Take SDA4 passes")
@@ -217,7 +233,8 @@ if (start_time < end_time) and option:
 
                 #The first row of the df. Everything will be concatenated from this one.
                 Uber_DF = pd.DataFrame(columns=["#", "TRUE","Type","Group", "D", "Unnamed: 5"])
-                if uploaded_files is not None:
+                if uploaded_files:
+                    print(uploaded_files)
                     
                 
                     #data_name = file.name
@@ -265,7 +282,7 @@ if (start_time < end_time) and option:
                 st.download_button(
                     label="Download CSV",
                     data=csv_file,
-                    file_name="data.csv",
+                    file_name=f"Batch_{option}_{option2}.csv",
                     mime="text/csv",
                     #icon=":material/download:",
                     )  
