@@ -43,8 +43,8 @@ url = "http://10.5.129.79/mfz/geoevt.json" #where the txt filename is!
 baseurl = "http://10.5.129.79/mfz/"
 # Make the request to the page
 try:
-    response = requests.get(url, timeout=10)
-    print("\n \n CARLETTOOOO \n \n")
+    response = requests.get(url, timeout=120)
+    
     if response.status_code == 200:
         # Parse the HTML
         soup = BeautifulSoup(response.text, "html.parser")
