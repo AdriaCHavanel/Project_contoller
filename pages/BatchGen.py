@@ -182,11 +182,11 @@ elif option == "Other":
     te = st.time_input("At end time:", value=None)
     st.write("Your Shift ends at:", s_end,"-",te)
     if(s_start != None and s_end != None and ts != None and te != None):
-        date_start_str = str(s_start) + "T" + str(ts)+"Z"
+        date_start_str = str(s_start) + "T" + str(ts)
         start_time = pd.to_datetime(date_start_str)
         # Localize to UTC
         start_time = start_time.tz_localize(local_tz).tz_convert('UTC')
-        date_end_str = str(s_end) + "T" + str(te)+"Z"
+        date_end_str = str(s_end) + "T" + str(te)
         end_time = pd.to_datetime(date_end_str)
         # Localize to UTC
         end_time = end_time.tz_localize(local_tz).tz_convert('UTC')
