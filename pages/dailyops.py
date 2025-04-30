@@ -234,18 +234,18 @@ if option == 'Groundcon':
     AUX_view_type = "Checks"
 
     SDA_MDR_label = "SDA Monitoring Data Reports"
-    SDA_MDR = False
+    SDA_MDR = True
     #SDA_MDR = st.checkbox(AUX_view_label, value=False)
     SDA_MDR_msg = "SDA Monitoring Data Reports Check"
-    SDA_MDR_time = UTC_AM
+    SDA_MDR_time = ReadFirstPass(merged_df, ["SDA4"], option2)
     SDA_MDR_group = "Ground Station"
     SDA_MDR_type = "Checks"
 
     DBA_MDR_label = "DBA Monitoring Data Reports"
-    DBA_MDR = False
+    DBA_MDR = True
     #DBA_MDR = st.checkbox(AUX_view_label, value=False)
     DBA_MDR_msg = "DBA Monitoring Data Reports Check"
-    DBA_MDR_time = UTC_AM
+    DBA_MDR_time = ReadFirstPass(merged_df, ["DBA1"], option2)
     DBA_MDR_group = "Ground Station"
     DBA_MDR_type = "Checks"
  
