@@ -201,15 +201,15 @@ if option == 'Groundcon':
     DBA_OEM_group = "Ground Station"
     DBA_OEM_type = "Checks"
     
-    IBA_AUX_label = "IBA AUX files"
-    IBA_AUX = False
-    #IBA_AUX = st.checkbox(IBA_AUX_label, value=False)
-    IBA_AUX_msg = "IBA and POFD Aux file check"
-    IBA_AUX_time = UTC_AM
-    IBA_AUX_group = "PDP"
-    IBA_AUX_type = "Checks"
+    #IBA_AUX_label = "IBA AUX files"
+    #IBA_AUX = False
+    ##IBA_AUX = st.checkbox(IBA_AUX_label, value=False)
+    #IBA_AUX_msg = "IBA and POFD Aux file check"
+    #IBA_AUX_time = UTC_AM
+    #IBA_AUX_group = "PDP"
+    #IBA_AUX_type = "Checks"
 
-    POFD_AUX_label = "POFD AUX files" #POFD and IBA files could be logged together!
+    POFD_AUX_label = "POFD and IBA AUX files" #POFD and IBA files could be logged together!
     POFD_AUX = False
     #POFD_AUX = st.checkbox(POFD_AUX_label, value=False)
     POFD_AUX_msg = "IBA and POFD Aux file check"
@@ -232,6 +232,23 @@ if option == 'Groundcon':
     AUX_view_time = UTC_AM
     AUX_view_group = "PDP"
     AUX_view_type = "Checks"
+
+    SDA_MDR_label = "SDA Monitoring Data Reports"
+    SDA_MDR = False
+    #SDA_MDR = st.checkbox(AUX_view_label, value=False)
+    SDA_MDR_msg = "SDA Monitoring Data Reports Check"
+    SDA_MDR_time = UTC_AM
+    SDA_MDR_group = "Ground Station"
+    SDA_MDR_type = "Checks"
+
+    DBA_MDR_label = "DBA Monitoring Data Reports"
+    DBA_MDR = False
+    #DBA_MDR = st.checkbox(AUX_view_label, value=False)
+    DBA_MDR_msg = "DBA Monitoring Data Reports Check"
+    DBA_MDR_time = UTC_AM
+    DBA_MDR_group = "Ground Station"
+    DBA_MDR_type = "Checks"
+ 
 
     SDA_SCH_label = "SDA weekly schedule"
     #SDA_SCH = st.checkbox(SDA_SCH_label, value=False)
@@ -266,11 +283,11 @@ if option == 'Groundcon':
          AUX_view = True
 
 
-    checklist = [GSTMC_Rep, SDA_Rep, DBA_Rep, SDA_OEM, DBA_OEM, IBA_AUX, POFD_AUX, SCH_AUX, AUX_view, SDA_SCH, DBA_SCH]
-    msglist = [GSTMC_Rep_msg, SDA_Rep_msg, DBA_Rep_msg, SDA_OEM_msg, DBA_OEM_msg, IBA_AUX_msg, POFD_AUX_msg, SCH_AUX_msg, AUX_view_msg, SDA_SCH_msg, DBA_SCH_msg]
-    timelist = [GSTMC_Rep_time, SDA_Rep_time, DBA_Rep_time, SDA_OEM_time, DBA_OEM_time, IBA_AUX_time, POFD_AUX_time, SCH_AUX_time, AUX_view_time, SDA_SCH_time, DBA_SCH_time]
-    grouplist = [GSTMC_Rep_group, SDA_Rep_group, DBA_Rep_group, SDA_OEM_group, DBA_OEM_group, IBA_AUX_group, POFD_AUX_group, SCH_AUX_group, AUX_view_group, SDA_SCH_group, DBA_SCH_group]
-    typelist = [GSTMC_Rep_type, SDA_Rep_type, DBA_Rep_type, SDA_OEM_type, DBA_OEM_type, IBA_AUX_type, POFD_AUX_type, SCH_AUX_type, AUX_view_type, SDA_SCH_type, DBA_SCH_type]
+    checklist = [GSTMC_Rep, SDA_Rep, DBA_Rep, SDA_OEM, DBA_OEM, POFD_AUX, SCH_AUX, AUX_view, SDA_SCH, DBA_SCH, SDA_MDR, DBA_MDR]
+    msglist = [GSTMC_Rep_msg, SDA_Rep_msg, DBA_Rep_msg, SDA_OEM_msg, DBA_OEM_msg, POFD_AUX_msg, SCH_AUX_msg, AUX_view_msg, SDA_SCH_msg, DBA_SCH_msg, SDA_MDR_msg, DBA_MDR_msg]
+    timelist = [GSTMC_Rep_time, SDA_Rep_time, DBA_Rep_time, SDA_OEM_time, DBA_OEM_time, POFD_AUX_time, SCH_AUX_time, AUX_view_time, SDA_SCH_time, DBA_SCH_time, SDA_MDR_time, DBA_MDR_time]
+    grouplist = [GSTMC_Rep_group, SDA_Rep_group, DBA_Rep_group, SDA_OEM_group, DBA_OEM_group, POFD_AUX_group, SCH_AUX_group, AUX_view_group, SDA_SCH_group, DBA_SCH_group, SDA_MDR_group, DBA_MDR_group]
+    typelist = [GSTMC_Rep_type, SDA_Rep_type, DBA_Rep_type, SDA_OEM_type, DBA_OEM_type, POFD_AUX_type, SCH_AUX_type, AUX_view_type, SDA_SCH_type, DBA_SCH_type, SDA_MDR_type, DBA_MDR_type]
 
 
 else:
@@ -379,7 +396,7 @@ for i, selection in enumerate(checklist):
                         severity,
                         typelist[i],
                         grouplist[i],
-                        f"<html><body><p> - {msglist[i]} - </p></body></html>",
+                        f"<html><body><p> {msglist[i]} </p></body></html>",
                         logbook,
                         ]], columns=Uber_DF.columns)], ignore_index=True)
     
